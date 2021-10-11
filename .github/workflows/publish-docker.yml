@@ -1,0 +1,51 @@
+name: publish-docker
+
+on:
+  push:
+    branches: [ master ]
+
+env:
+  GITHUB_IMAGE_NAME: alisls-fluent
+  DOCKER_IMAGE_NAME: suisrc/alisls-fluent
+  DOCKER_VERSION: '1.8.8-1'
+  QUAY_REGISTRY: quay.io
+  DOCKER_REGISTRY: docker.io
+
+jobs:
+  build-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          docker build -t image .
+
+      - name: Push docker image
+        run: |
+          REGISTRY_URL=$DOCKER_REGISTRY
+          echo "${{ secrets.DOCKER_TOKEN }}" | docker login $REGISTRY_URL -u ${{ secrets.DOCKER_USER }} --password-stdin
+
+          IMAGE_ID=$REGISTRY_URL/$DOCKER_IMAGE_NAME
+          echo IMAGE_ID=$IMAGE_ID
+
+          VERSION=$DOCKER_VERSION
+          echo VERSION=$VERSION
+
+          docker tag image $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+
+      - name: Push quay image
+        run: |
+          REGISTRY_URL=$QUAY_REGISTRY
+          echo "${{ secrets.QUAY_TOKEN }}" | docker login $REGISTRY_URL -u ${{ secrets.QUAY_USER }} --password-stdin
+
+          IMAGE_ID=$REGISTRY_URL/$DOCKER_IMAGE_NAME
+          echo IMAGE_ID=$IMAGE_ID
+
+          VERSION=$DOCKER_VERSION
+          echo VERSION=$VERSION
+
+          docker tag image $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
