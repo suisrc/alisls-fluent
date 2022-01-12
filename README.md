@@ -38,9 +38,9 @@ data:
     [OUTPUT]
         Name             alisls
         Match            *
-        SLSProject       YOUR_PROJECT
-        SLSLogStore      YOUR_PROJECT
-        SLSEndPoint      YOUR_PROJECT
+        SLSProject       YOUR_PROJECT     # project-01
+        SLSLogStore      YOUR_PROJECT     # store-01
+        SLSEndPoint      YOUR_PROJECT     # xxxx-intranet.log.aliyuncs.com
         AccessKeyID      YOUR_PROJECT_SK
         AccessKeySecret  YOUR_PROJECT_AK
 
@@ -66,7 +66,7 @@ spec:
     - name: app
       image: YOUR_APP_IMAGE
     - name: sls-sidecar
-      image: suisrc/alisls-fluent:1.8.8
+      image: suisrc/alisls-fluent:1.8.8-1
       volumeMounts:
         - name: config-volume
           mountPath: /fluent-bit/etc/
