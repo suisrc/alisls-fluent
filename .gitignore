@@ -40,9 +40,11 @@ runtime/*
 */test/*
 */test
 */vendor
-logs/*
+temp/
+logs/
 __*
 docker/zgo
+*_temp
 
 out_sls.h
 out_sls.so

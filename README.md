@@ -66,7 +66,7 @@ spec:
     - name: app
       image: YOUR_APP_IMAGE
     - name: sls-sidecar
-      image: suisrc/alisls-fluent:1.8.8
+      image: suisrc/alisls-fluent:1.8.8-1
       volumeMounts:
         - name: config-volume
           mountPath: /fluent-bit/etc/
@@ -75,3 +75,36 @@ spec:
       configMap:
         name: alisls-fluent-config
 ```
+
+
+### debug
+
+#### fluent-bit
+cat << EOF > /etc/yum.repos.d/fluent-bit.repo
+[fluent-bit]
+name = Fluent Bit
+baseurl=https://packages.fluentbit.io/centos/7/x86_64/
+gpgcheck=1
+gpgkey=https://packages.fluentbit.io/fluentbit.key
+repo_gpgcheck=1
+enabled=1
+EOF
+cat /etc/yum.repos.d/fluent-bit.repo
+yum -y install fluent-bit
+yum -y install td-agent-bit
+
+cp ./bin/fluent-bit /opt/fluent-bit/bin/
+#### openresty
+cat << EOF > /etc/yum.repos.d/openresty.repo
+[openresty]
+name=Official OpenResty Open Source Repository for CentOS
+baseurl=https://openresty.org/package/centos/7/x86_64
+skip_if_unavailable=False
+gpgcheck=1
+repo_gpgcheck=0
+gpgkey=https://openresty.org/package/pubkey.gpg
+enabled=1
+enabled_metadata=1
+EOF
+cat /etc/yum.repos.d/openresty.repo
+yum -y install openresty
