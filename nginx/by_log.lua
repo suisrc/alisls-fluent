@@ -16,6 +16,7 @@ if not logger.initted() then
 end
 -- https://www.cnblogs.com/JohnABC/p/6182915.html
 -- https://nginx.org/en/docs/http/ngx_http_core_module.html#variables
+-- https://nginx.org/en/docs/http/ngx_http_proxy_module.html#variables
 -- https://openresty-reference.readthedocs.io/en/latest/Lua_Nginx_API/#ngxvarvariable
 -- https://zhuanlan.zhihu.com/p/67904411
 -- construct the custom access log message in the Lua variable "msg"
@@ -28,8 +29,8 @@ local msg = {}
 msg.traceId = ngx.var.http_x_request_id
 msg.clientId = ngx.var.http_x_client_id or ngx.var.cookie__xc
 msg.remoteIp = ngx.var.realip_remote_addr or ngx.var.remote_addr
-msg.userAgent = ngx.var.http_user_agent
-msg.referer = ngx.var.http_referer
+msg.userAgent = ngx.var.http_user_agent or ""
+msg.referer = ngx.var.http_referer or ""
 msg.flowId = ngx.var.arg_flow or ""
 -- 登录者信息
 -- 通过令牌获取登录者信息
@@ -66,14 +67,14 @@ end
 msg.serviceName = ngx.var.proxy_host or ""
 msg.serviceAddr = ngx.var.upstream_addr or ""
 -- 请求描述
-msg.host = ngx.var.host
-msg.path = ngx.var.request_uri
-msg.method = ngx.var.method
-msg.status = ngx.var.status
-msg.startTime = ngx.req.start_time()
-msg.reqTime = ngx.var.request_time
+msg.host = ngx.var.host or ""
+msg.path = ngx.var.request_uri or ""
+msg.method = ngx.var.request_method or ""
+msg.status = ngx.var.status or ""
+msg.startTime = os.date("%Y-%m-%dT%H:%M:%S", ngx.req.start_time()) or ""
+msg.reqTime = ngx.var.request_time or ""
 -- msg.reqTime = ngx.now() - msg.startTime
-msg.reqHeaders = ngx.req.raw_header(true)
+msg.reqHeaders = ngx.req.raw_header(true) or ""
 msg.respHeaders = "" -- 这里格式化
 for k, v in pairs(ngx.resp.get_headers()) do
     if type(v) == "table" then

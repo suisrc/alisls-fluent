@@ -13,7 +13,7 @@ tidy:
 	go mod tidy
 
 dev:
-	bin/fluent-bit -c _fluent.conf -e out_sls.so
+	bin/fluent-bit -c __fluent.conf -e ./out_sls.so
 
 dev1:
 	bin/fluent-bit -c _fluent.conf
