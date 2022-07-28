@@ -13,10 +13,10 @@ tidy:
 	go mod tidy
 
 dev:
-	bin/fluent-bit -c __fluent.conf -e ./out_sls.so
+	bin/fluent-bit -c fluentbit/__fluent.conf -e ./out_sls.so
 
 dev1:
-	bin/fluent-bit -c _fluent.conf
+	bin/fluent-bit -c fluentbit/_fluent.conf
 
 dev2:
 	bin/openresty -p ${PWD}/nginx -c nginx.conf
