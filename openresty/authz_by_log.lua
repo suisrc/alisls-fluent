@@ -3,8 +3,8 @@ local cjson = require "cjson"
 local logger = require "resty.logger.socket"
 if not logger.initted() then
     local ok, err = logger.init{
-        host= ngx.var.lua_syslog_host or "127.0.0.1", -- 10.244.4.200
-        port= ngx.var.lua_syslog_port or 514,
+        host= ngx.var.lua_syslog_host or "logs-svc.default.svc.cluster.local", -- 127.0.0.1
+        port= ngx.var.lua_syslog_port or 5144,
         sock_type= ngx.var.lua_syslog_type or "udp",
         -- flush after each log, >1会发生日志丢失
         flush_limit= ngx.var.lua_syslog_limit or 1, 

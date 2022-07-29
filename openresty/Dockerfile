@@ -7,7 +7,9 @@ RUN apk update && apk add --no-cache inotify-tools &&\
 
 COPY _nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
 COPY _socket.lua /usr/local/openresty/lualib/resty/logger/socket.lua
-ADD  ["by_*.lua", "/usr/local/openresty/nginx/conf/"]
+
+COPY authz.conf /etc/nginx/az/authz.conf
+ADD  ["authz_by_*.lua", "/etc/nginx/az/"]
 
 ADD  ["*.sh", "/cmd/"]
 CMD  ["/cmd/auto-reload1.sh"]
