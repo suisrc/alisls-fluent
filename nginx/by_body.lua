@@ -2,11 +2,21 @@
 -- https://github.com/openresty/lua-nginx-module/issues/1092
 
 if ngx.is_subrequest then
+    local chunk, eof = ngx.arg[1], ngx.arg[2]
+    if eof then
+        -- 抽取子请求内容，记录日志
+        ngx.ctx.sub_proxy_host = ngx.var.proxy_host
+        ngx.ctx.sub_upstream_addr = ngx.var.upstream_addr
+    end
     return -- 不记录子请求
 end
+
 if ngx.ctx.resp_buffered == nil then
     local ajson = "application/json"
     local rtype = ngx.var.upstream_http_content_type
+    if rtype == nil then
+        rtype = ngx.resp.get_headers()["content-type"]
+    end
     -- ngx.log(ngx.ERR, "content_type: ", rtype)
     if rtype and string.sub(rtype, 1, #ajson) ~= ajson then
         return -- 只记录json内容
@@ -15,8 +25,14 @@ end
 local chunk, eof = ngx.arg[1], ngx.arg[2]
 -- ngx.log(ngx.ERR, "chunk: ", chunk)
 if chunk ~= nil and chunk ~= "" then
+    -- 记录请求body内容
     -- 这种行为很容易导致LuaJIT发生GC，但是这确实是当前唯一解决方案
     ngx.ctx.resp_buffered = (ngx.ctx.resp_buffered or "")..chunk
+end
+if eof then
+    -- 最后一次响应，合并所有数据
+    ngx.ctx.resp_body = ngx.ctx.resp_buffered
+    ngx.ctx.resp_buffered = nil
 end
 
 -- -- 获取当前响应数据

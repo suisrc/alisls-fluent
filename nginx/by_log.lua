@@ -3,11 +3,12 @@ local cjson = require "cjson"
 local logger = require "resty.logger.socket"
 if not logger.initted() then
     local ok, err = logger.init{
-        host="127.0.0.1", -- 10.244.4.200
-        port=514,
-        sock_type="udp",
-        flush_limit = 1, -- flush after each log, >1会发生日志丢失
-        --drop_limit = 5678
+        host= ngx.var.lua_syslog_host or "127.0.0.1", -- 10.244.4.200
+        port= ngx.var.lua_syslog_port or 514,
+        sock_type= ngx.var.lua_syslog_type or "udp",
+        -- flush after each log, >1会发生日志丢失
+        flush_limit= ngx.var.lua_syslog_limit or 1, 
+        --drop_limit= 5678
     }
     if not ok then
         ngx.log(ngx.ERR, "failed to initialize the logger: ", err)
@@ -63,9 +64,6 @@ if msg.tokenId == "" then
         end
     end
 end
--- 服务
-msg.serviceName = ngx.var.proxy_host or ""
-msg.serviceAddr = ngx.var.upstream_addr or ""
 -- 请求描述
 msg.host = ngx.var.host or ""
 msg.path = ngx.var.request_uri or ""
@@ -74,17 +72,36 @@ msg.status = ngx.var.status or ""
 msg.startTime = os.date("%Y-%m-%dT%H:%M:%S", ngx.req.start_time()) or ""
 msg.reqTime = ngx.var.request_time or ""
 -- msg.reqTime = ngx.now() - msg.startTime
-msg.reqHeaders = ngx.req.raw_header(true) or ""
-msg.respHeaders = "" -- 这里格式化
+-- msg.reqHeaders = ngx.req.raw_header(true) or ""
+msg.reqHeaders = ""
+for k, v in pairs(ngx.req.get_headers()) do
+    if type(v) == "table" then
+        for _, v1 in pairs(v) do
+            msg.reqHeaders = msg.reqHeaders..k..": "..v1.."\n"
+        end
+    else
+        msg.reqHeaders = msg.reqHeaders..k..": "..v.."\n"
+    end
+    if k == "x-authz-service-name" then
+        authz = v
+    end
+end
+msg.respHeaders = ""
 for k, v in pairs(ngx.resp.get_headers()) do
     if type(v) == "table" then
         for _, v1 in pairs(v) do
-            msg.respHeaders = msg.respHeaders..k..": "..v1.."\r\n"
+            msg.respHeaders = msg.respHeaders..k..": "..v1.."\n"
         end
     else
-        msg.respHeaders = msg.respHeaders..k..": "..v.."\r\n"
+        msg.respHeaders = msg.respHeaders..k..": "..v.."\n"
     end
 end
+-- 服务
+msg.tags = ngx.var.proxy_tags or ""
+msg.serviceName = ngx.var.proxy_host or ngx.ctx.sub_proxy_host or ""
+msg.serviceAddr = ngx.var.upstream_addr or ngx.ctx.sub_upstream_addr or ""
+msg.serviceAuth = ngx.ctx.sub_proxy_host or ""
+-- 参数
 local ajson = "application/json"
 local rqtyp = ngx.var.http_content_type
 if rqtyp and string.sub(rqtyp, 1, #ajson) == ajson then
@@ -92,12 +109,14 @@ if rqtyp and string.sub(rqtyp, 1, #ajson) == ajson then
 else
     msg.reqBody = "" -- 不记录参数
 end
-local json = ""
-local rptyp = ngx.var.upstream_http_content_type
-if rptyp and string.sub(rptyp, 1, #ajson) == ajson then
+-- 响应
+--local rtype = ngx.resp.get_headers()["content-type"]
+--local rptyp = ngx.var.upstream_http_content_type
+--if rptyp and string.sub(rptyp, 1, #ajson) == ajson then
+if ngx.ctx.resp_body ~= nil then
     -- body_filter_by_lua
     -- 每次请求的响应输出在ngx.arg[1]中；而是否到eof则标记在ngx.arg[2]中
-    msg.respBody = ngx.ctx.resp_buffered   --json格式的返回结果被记录
+    msg.respBody = ngx.ctx.resp_body   --json格式的返回结果被记录
 else
     msg.respBody = "" -- 不记录返回结果
 end
