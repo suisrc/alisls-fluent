@@ -12,7 +12,7 @@ env:
   DOCKER_REGISTRY: docker.io
 
   DOCKER_ORY_IMAGE_NAME: suisrc/openresty
-  DOCKER_ORY_VERSION: '1.21.4.1-2'
+  DOCKER_ORY_VERSION: '1.21.4.1-az'
 
 jobs:
   build-fluent:
