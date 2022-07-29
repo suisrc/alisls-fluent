@@ -10,6 +10,7 @@ RUN  cd /build/ && go build -buildmode=c-shared -o out_sls.so .
 FROM fluent/fluent-bit:1.9.6 as fluent-bit
 USER root
 
+COPY parsers.conf   /fluent-bit/etc/parsers2.conf
 COPY --from=builder /build/out_sls.so /fluent-bit/bin/
 COPY --from=builder /build/out_sls.h  /fluent-bit/bin/
 
