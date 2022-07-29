@@ -73,17 +73,28 @@ msg.startTime = os.date("%Y-%m-%dT%H:%M:%S", ngx.req.start_time()) or ""
 msg.reqTime = ngx.var.request_time or ""
 -- msg.reqTime = ngx.now() - msg.startTime
 -- msg.reqHeaders = ngx.req.raw_header(true) or ""
+-- msg.reqCookies = ngx.var.http_cookie or ""
 msg.reqHeaders = ""
+msg.reqHeader2s = ""
+local rpsky = "x-request-sky-" -- 包含认证敏感信息，不能对外开放
 for k, v in pairs(ngx.req.get_headers()) do
-    if type(v) == "table" then
-        for _, v1 in pairs(v) do
-            msg.reqHeaders = msg.reqHeaders..k..": "..v1.."\n"
+    -- authorization, cookie中包含用户登录的敏感信息，不能对外开放
+    if k == 'authorization' or k == "cookie" or string.sub(k, 1, #rpsky) == rpsky then
+        if type(v) == "table" then
+            for _, v1 in pairs(v) do
+                msg.reqHeader2s = msg.reqHeader2s..k..": "..v1.."\n"
+            end
+        else
+            msg.reqHeader2s = msg.reqHeader2s..k..": "..v.."\n"
         end
     else
-        msg.reqHeaders = msg.reqHeaders..k..": "..v.."\n"
-    end
-    if k == "x-authz-service-name" then
-        authz = v
+        if type(v) == "table" then
+            for _, v1 in pairs(v) do
+                msg.reqHeaders = msg.reqHeaders..k..": "..v1.."\n"
+            end
+        else
+            msg.reqHeaders = msg.reqHeaders..k..": "..v.."\n"
+        end
     end
 end
 msg.respHeaders = ""
