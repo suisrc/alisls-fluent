@@ -19,7 +19,7 @@ dev1:
 	bin/fluent-bit -c fluentbit/_fluent.conf
 
 dev2:
-	bin/openresty -p ${PWD}/nginx -c nginx.conf
+	bin/openresty -p ${PWD}/openresty -c nginx.conf
 
 build:
 	go build -buildmode=c-shared -o out_sls.so .
