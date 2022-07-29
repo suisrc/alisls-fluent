@@ -6,13 +6,13 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: suisrc/fluent-bit
-  DOCKER_VERSION: '1.9.6-az'
+  DOCKER_VERSION: '1.9.6-az-1'
 
   QUAY_REGISTRY: quay.io
   DOCKER_REGISTRY: docker.io
 
   DOCKER_ORY_IMAGE_NAME: suisrc/openresty
-  DOCKER_ORY_VERSION: '1.21.4.1-az'
+  DOCKER_ORY_VERSION: '1.21.4.1-az-1'
 
 jobs:
   build-fluent:

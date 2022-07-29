@@ -44,11 +44,12 @@ end
 msg.tokenId = tblj.jti or ""
 msg.nickname = tblj.nnm or ""
 msg.accountCode = tblj.sub or ""
-msg.userCode = tblj.uco or ""
 msg.tenantCode = tblj.tco or ""
-msg.roleCode = tblj.trc or ""
+msg.userCode = tblj.uco or ""
+msg.userTenCode = tblj.tuc or ""
 msg.appCode = tblj.three or ""
 msg.appTenCode = tblj.app or ""
+msg.roleCode = tblj.trc or tblj.rol or ""
 if msg.tokenId == "" then
     if ngx.var.http_authorization then
         local auth = ngx.var.http_authorization
