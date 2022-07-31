@@ -35,21 +35,21 @@ msg.referer = ngx.var.http_referer or ""
 msg.flowId = ngx.var.arg_flow or ""
 -- 登录者信息
 -- 通过令牌获取登录者信息
-local tblj = {}
-local token = ngx.var.http_x_request_sky_authorize
+local tknj = {}
+local token = ngx.var.http_x_request_sky_authorize or ngx.ctx.sub_headers["X-Request-Sky-Authorize"] or false
 if token then
     -- 解析base64令牌 to json
-    tblj = cjson.decode(ngx.decode_base64(token))
+    tknj = cjson.decode(ngx.decode_base64(token))
 end
-msg.tokenId = tblj.jti or ""
-msg.nickname = tblj.nnm or ""
-msg.accountCode = tblj.sub or ""
-msg.tenantCode = tblj.tco or ""
-msg.userCode = tblj.uco or ""
-msg.userTenCode = tblj.tuc or ""
-msg.appCode = tblj.three or ""
-msg.appTenCode = tblj.app or ""
-msg.roleCode = tblj.trc or tblj.rol or ""
+msg.tokenId = tknj.jti or ""
+msg.nickname = tknj.nnm or ""
+msg.accountCode = tknj.sub or ""
+msg.tenantCode = tknj.tco or ""
+msg.userCode = tknj.uco or ""
+msg.userTenCode = tknj.tuc or ""
+msg.appCode = tknj.three or ""
+msg.appTenCode = tknj.app or ""
+msg.roleCode = tknj.trc or tknj.rol or ""
 if msg.tokenId == "" then
     if ngx.var.http_authorization then
         local auth = ngx.var.http_authorization
@@ -139,9 +139,10 @@ elseif msg.status >= "300" then
     msg.result2 = "重定向"
 elseif msg.respBody ~= nil and msg.respBody ~= "" then
     -- 解析 json
-    local tblj = cjson.decode(msg.respBody)
-    if not tblj.success then
-        if tblj.showType == 9 then
+    local resj = cjson.decode(msg.respBody)
+    -- 返回值可能存在不规范情况，即不是json类型
+    if type(resj) == "table" and (not resj.success) then
+        if resj.showType == 9 then
             msg.result2 = "重定向"
         else
             msg.result2 = "错误"
