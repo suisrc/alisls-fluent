@@ -65,6 +65,8 @@ if msg.tokenId == "" then
         end
     end
 end
+-- 请求鉴权匹配的策略，记录请求通过接口的策略
+msg.matchPolicys = ngx.var.http_x_request_sky_policys or ngx.ctx.sub_headers and ngx.ctx.sub_headers["X-Request-Sky-Policys"] or ""
 -- 请求描述
 msg.host = ngx.var.host or ""
 msg.path = ngx.var.request_uri or ""
