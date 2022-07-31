@@ -26,9 +26,9 @@ end
 for k,v in pairs(res.header) do
     if string.byte(k,1) == 88 and string.byte(k,2) == 45 then
         -- 特殊标记的请求头信息，忽略(缓存上下文中,日志系统可能需要)
-        if ngx.ctx.sub_headers == nil {
+        if ngx.ctx.sub_headers == nil then
             ngx.ctx.sub_headers = {}
-        }
+        end
         ngx.ctx.sub_headers[k] = v
     else
         ngx.header[k] = v

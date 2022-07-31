@@ -36,7 +36,7 @@ msg.flowId = ngx.var.arg_flow or ""
 -- 登录者信息
 -- 通过令牌获取登录者信息
 local tknj = {}
-local token = ngx.var.http_x_request_sky_authorize or ngx.ctx.sub_headers["X-Request-Sky-Authorize"] or false
+local token = ngx.var.http_x_request_sky_authorize or ngx.ctx.sub_headers and ngx.ctx.sub_headers["X-Request-Sky-Authorize"] or false
 if token then
     -- 解析base64令牌 to json
     tknj = cjson.decode(ngx.decode_base64(token))
