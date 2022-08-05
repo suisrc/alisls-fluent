@@ -29,7 +29,7 @@ end
 local msg = {}
 msg.traceId = ngx.var.http_x_request_id
 msg.clientId = ngx.var.http_x_client_id or ngx.var.cookie__xc
-msg.remoteIp = ngx.var.realip_remote_addr or ngx.var.remote_addr
+msg.remoteIp = ngx.var.http_x_real_ip or ngx.var.realip_remote_addr
 msg.userAgent = ngx.var.http_user_agent or ""
 msg.referer = ngx.var.http_referer or ""
 msg.flowId = ngx.var.arg_flow or ""
