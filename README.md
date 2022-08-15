@@ -108,3 +108,10 @@ enabled_metadata=1
 EOF
 cat /etc/yum.repos.d/openresty.repo
 yum -y install openresty
+
+## /etc/hosts
+curl http://end-iam-kin-svc.dev-fmes.svc/authx
+curl http://end-iam-kin-svc.dev-fmes.svc.logs-pxy.default.svc/authx
+
+127.0.0.1 end-iam-kin-svc.dev-fmes.svc.logs-pxy.default.svc
+127.0.0.1 end-iam-kin-svc.dev-fmes.svc.logs-pxy.default.svc.cluster.local

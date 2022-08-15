@@ -1,6 +1,6 @@
 -- https://github.com/cloudflare/lua-resty-logger-socket/blob/master/lib/resty/logger/socket.lua
 -- mkdir /usr/local/openresty/lualib/resty/logger // 创建目录
--- cp nginx/_socket.lua /usr/local/openresty/lualib/resty/logger/socket.lua
+-- cp openresty/_socket.lua /usr/local/openresty/lualib/resty/logger/socket.lua
 -- Copyright (C) 2013-2014 Jiale Zhi (calio), CloudFlare Inc.
 --require "luacov"
 
