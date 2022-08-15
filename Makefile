@@ -16,10 +16,10 @@ dev:
 	bin/fluent-bit -c fluentbit/__fluent.conf -e ./out_sls.so
 
 dev1:
-	bin/fluent-bit -c fluentbit/fluent.CONF
+	bin/fluent-bit -c fluentbit/test_fluent.CONF
 
 dev2:
-	bin/openresty -p ${PWD}/openresty -c nginx.CONF
+	bin/openresty -p ${PWD}/openresty -c test_nginx.CONF
 
 build:
 	go build -buildmode=c-shared -o out_sls.so .
