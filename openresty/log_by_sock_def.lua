@@ -1,3 +1,5 @@
+-- 移除了用户信息部分内容
+
 -- log_by_lua
 local cjson = require "cjson"
 local logger = require "resty.logger.socket"
@@ -15,17 +17,7 @@ if not logger.initted() then
         return
     end
 end
--- https://www.cnblogs.com/JohnABC/p/6182915.html
--- https://nginx.org/en/docs/http/ngx_http_core_module.html#variables
--- https://nginx.org/en/docs/http/ngx_http_proxy_module.html#variables
--- https://openresty-reference.readthedocs.io/en/latest/Lua_Nginx_API/#ngxvarvariable
--- https://zhuanlan.zhihu.com/p/67904411
--- construct the custom access log message in the Lua variable "msg"
--- traceId, flowId, clientId, tokenId, remoteIp, userAgent(终端), referer(界面), 
--- accountCode, userCode, tenantCode, roleCode, appCode(应用), appTenCode(租户应用)
--- service(服务), serviceAddr 
--- method(方法), status(状态), rqtime(请求), rptime(耗时), result_2(成功，失败，重定向), rqheader, rpheader(返回前端的header信息)
--- host(域名), path(路径), body(参数,只记录json), json(只有返回json结果才记录)
+-- 日志级别信息
 local msg = {}
 msg.traceId = ngx.var.http_x_request_id
 msg.clientId = ngx.var.http_x_client_id or ngx.var.cookie__xc
@@ -33,38 +25,7 @@ msg.remoteIp = ngx.var.http_x_real_ip or ngx.var.realip_remote_addr
 msg.userAgent = ngx.var.http_user_agent or ""
 msg.referer = ngx.var.http_referer or ""
 msg.flowId = ngx.var.arg_flow or ""
--- 登录者信息
--- 通过令牌获取登录者信息
-local tknj = {}
-local token = ngx.var.http_x_request_sky_authorize or ngx.ctx.sub_headers and ngx.ctx.sub_headers["X-Request-Sky-Authorize"] or false
-if token then
-    -- 解析base64令牌 to json
-    tknj = cjson.decode(ngx.decode_base64(token))
-end
-msg.tokenId = tknj.jti or ""
-msg.nickname = tknj.nnm or ""
-msg.accountCode = tknj.sub or ""
-msg.tenantCode = tknj.tco or ""
-msg.userCode = tknj.uco or ""
-msg.userTenCode = tknj.tuc or ""
-msg.appCode = tknj.three or ""
-msg.appTenCode = tknj.app or ""
-msg.roleCode = tknj.trc or tknj.rol or ""
-if msg.tokenId == "" then
-    if ngx.var.http_authorization then
-        local auth = ngx.var.http_authorization
-        local auth_type = string.match(auth, "^Bearer%s+(%w+)")
-        if auth_type == "kst" then
-            msg.tokenId = string.sub(auth, 52, 76)
-        end
-    elseif ngx.var.cookie_kat then
-        local auth = ngx.var.cookie_kat
-        local auth_type = string.match(auth, "^(%w+)")
-        if auth_type == "kst" then
-            msg.tokenId = string.sub(auth, 45, 69)
-        end
-    end
-end
+-- 登录用户级基本信息在这里不做记录
 -- 请求鉴权匹配的策略，记录请求通过接口的策略
 msg.matchPolicys = ngx.var.http_x_request_sky_policys or ngx.ctx.sub_headers and ngx.ctx.sub_headers["X-Request-Sky-Policys"] or ""
 -- 请求描述

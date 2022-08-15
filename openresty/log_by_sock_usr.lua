@@ -3,9 +3,9 @@ local cjson = require "cjson"
 local logger = require "resty.logger.socket"
 if not logger.initted() then
     local ok, err = logger.init{
-        host      = os.getenv("LUA_SYSLOG_HOST") or "127.0.0.1",
-        port      = tonumber(os.getenv("LUA_SYSLOG_PORT")) or 5144,
-        sock_type = os.getenv("LUA_SYSLOG_TYPE") or "udp",
+        host      = ngx.var.lua_syslog_host or os.getenv("LUA_SYSLOG_HOST") or "127.0.0.1",
+        port      = ngx.var.lua_syslog_port or tonumber(os.getenv("LUA_SYSLOG_PORT")) or 5144,
+        sock_type = ngx.var.lua_syslog_type or os.getenv("LUA_SYSLOG_TYPE") or "udp",
         -- flush after each log, >1会发生日志丢失
         flush_limit= ngx.var.lua_syslog_limit or 1, 
         --drop_limit= 5678
@@ -15,6 +15,7 @@ if not logger.initted() then
         return
     end
 end
+-- 日志级别信息
 -- https://www.cnblogs.com/JohnABC/p/6182915.html
 -- https://nginx.org/en/docs/http/ngx_http_core_module.html#variables
 -- https://nginx.org/en/docs/http/ngx_http_proxy_module.html#variables

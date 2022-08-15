@@ -113,5 +113,13 @@ yum -y install openresty
 curl http://end-iam-kin-svc.dev-fmes.svc/authx
 curl http://end-iam-kin-svc.dev-fmes.svc.logs-pxy.default.svc/authx
 
-127.0.0.1 end-iam-kin-svc.dev-fmes.svc.logs-pxy.default.svc
-127.0.0.1 end-iam-kin-svc.dev-fmes.svc.logs-pxy.default.svc.cluster.local
+## authz测试
+curl http://127.0.0.1:81/api/kas/v1?access_token=kst..account.p7_17bf2c6d678b
+curl http://127.0.0.1:81/api/iam/v1/a/odic/authx?access_token=kst..account.p7_17bf2c6d678b\
+curl http://end-iam-cas-svc.dev-fmes.svc.cluster.local/authx?access_token=kst..account.p7_17bf2c6d678b
+
+## proxy测试
+curl http://https-443.sso.dev1.sims-cn.com.logs-spy:82/api/iam/v1/authx
+curl http://127.0.0.1:82/https-443.sso.dev1.sims-cn.com/api/iam/v1/authx
+curl http://http.end-iam-kin-svc.dev-fmes.svc.logs-spy:82/api/iam/v1/authx
+curl http://127.0.0.1:82/internal.end-iam-kin-svc.dev-fmes.svc/api/iam/v1/authx
