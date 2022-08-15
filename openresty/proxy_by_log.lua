@@ -3,9 +3,9 @@ local cjson = require "cjson"
 local logger = require "resty.logger.socket"
 if not logger.initted() then
     local ok, err = logger.init{
-        host= ngx.var.lua_syslog_host or "logs-svc.default.svc.cluster.local", -- 127.0.0.1
-        port= ngx.var.lua_syslog_port or 5144,
-        sock_type= ngx.var.lua_syslog_type or "udp",
+        host      = os.getenv("LUA_SYSLOG_HOST") or "127.0.0.1",
+        port      = tonumber(os.getenv("LUA_SYSLOG_PORT")) or 5144,
+        sock_type = os.getenv("LUA_SYSLOG_TYPE") or "udp",
         -- flush after each log, >1会发生日志丢失
         flush_limit= ngx.var.lua_syslog_limit or 1, 
         --drop_limit= 5678
@@ -68,18 +68,26 @@ end
 -- 请求鉴权匹配的策略，记录请求通过接口的策略
 msg.matchPolicys = ngx.var.http_x_request_sky_policys or ngx.ctx.sub_headers and ngx.ctx.sub_headers["X-Request-Sky-Policys"] or ""
 -- 请求描述
-msg.host = ngx.var.host or ""
-msg.path = ngx.var.request_uri or ""
+msg.host = ngx.var.proxy_host or ngx.var.host or ""
+msg.path = ngx.var.proxy_uri or ngx.var.request_uri or ""
 msg.method = ngx.var.request_method or ""
 msg.status = ngx.var.status or ""
 msg.startTime = os.date("%Y-%m-%dT%H:%M:%S", ngx.req.start_time()) or ""
 msg.reqTime = ngx.var.request_time or ""
 -- msg.reqTime = ngx.now() - msg.startTime
+-- 服务
+msg.tags = ngx.var.proxy_tags or ""
+msg.serviceName = ngx.var.proxy_host or ngx.ctx.sub_proxy_host or ""
+msg.serviceAddr = ngx.var.upstream_addr or ngx.ctx.sub_upstream_addr or ""
+msg.serviceAuth = ngx.ctx.sub_proxy_host or ""
+msg.requester = msg.remoteIp     -- 请求者
+msg.responder = msg.serviceName  -- 响应者
 -- msg.reqHeaders = ngx.req.raw_header(true) or ""
 -- msg.reqCookies = ngx.var.http_cookie or ""
+local rpsky = "x-request-sky-"  -- 包含认证敏感信息，不能对外开放
+local rpsrv = "x-service-name"  -- 应答的服务器
 msg.reqHeaders = ""
 msg.reqHeader2s = ""
-local rpsky = "x-request-sky-" -- 包含认证敏感信息，不能对外开放
 for k, v in pairs(ngx.req.get_headers()) do
     -- authorization, cookie中包含用户登录的敏感信息，不能对外开放
     if k == 'authorization' or k == "cookie" or string.sub(k, 1, #rpsky) == rpsky then
@@ -99,6 +107,9 @@ for k, v in pairs(ngx.req.get_headers()) do
             msg.reqHeaders = msg.reqHeaders..k..": "..v.."\n"
         end
     end
+    if k == rpsrv then
+        msg.requester = v
+    end
 end
 msg.respHeaders = ""
 for k, v in pairs(ngx.resp.get_headers()) do
@@ -109,12 +120,10 @@ for k, v in pairs(ngx.resp.get_headers()) do
     else
         msg.respHeaders = msg.respHeaders..k..": "..v.."\n"
     end
+    if k == rpsrv then
+        msg.responder = v
+    end
 end
--- 服务
-msg.tags = ngx.var.proxy_tags or ""
-msg.serviceName = ngx.var.proxy_host or ngx.ctx.sub_proxy_host or ""
-msg.serviceAddr = ngx.var.upstream_addr or ngx.ctx.sub_upstream_addr or ""
-msg.serviceAuth = ngx.ctx.sub_proxy_host or ""
 -- 参数
 local ajson = "application/json"
 local rqtyp = ngx.var.http_content_type

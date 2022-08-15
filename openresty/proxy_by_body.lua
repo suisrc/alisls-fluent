@@ -11,6 +11,9 @@ if ngx.is_subrequest then
     return -- 不记录子请求
 end
 
+if ngx.ctx.resp_buffered_ignore then
+    return -- 操作内容忽略
+end
 if ngx.ctx.resp_buffered == nil then
     local ajson = "application/json"
     local rtype = ngx.var.upstream_http_content_type
@@ -19,6 +22,7 @@ if ngx.ctx.resp_buffered == nil then
     end
     -- ngx.log(ngx.ERR, "content_type: ", rtype)
     if rtype and string.sub(rtype, 1, #ajson) ~= ajson then
+        ngx.ctx.resp_buffered_ignore = true
         return -- 只记录json内容
     end
 end

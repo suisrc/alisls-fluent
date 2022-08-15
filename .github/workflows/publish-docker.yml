@@ -6,7 +6,7 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: suisrc/fluent-bit
-  DOCKER_VERSION: '1.9.6-az-5'
+  DOCKER_VERSION: '1.9.6-rx-5'
 
   QUAY_REGISTRY: quay.io
   DOCKER_REGISTRY: docker.io
