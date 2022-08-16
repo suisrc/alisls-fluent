@@ -1,7 +1,7 @@
 #!/bin/sh
 if [ $KS_WATCHDOG ]; then ## 看门狗模式
     vars=""
-    cat /etc/nginx/kg/.env | while read line ; do  vars=$vars"\${${line%%;*}} "; done
+    cat /etc/nginx/kg/env.conf | while read line ; do  vars=$vars"\${${line%%;*}} "; done
     envsubst $vars < /etc/nginx/kg/nginx.conf   > /usr/local/openresty/nginx/conf/nginx.conf
     envsubst $vars < /etc/nginx/kg/default.conf > /etc/nginx/conf.d/default.conf
 fi
