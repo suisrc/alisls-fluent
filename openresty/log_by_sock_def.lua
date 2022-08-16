@@ -5,11 +5,11 @@ local cjson = require "cjson"
 local logger = require "resty.logger.socket"
 if not logger.initted() then
     local ok, err = logger.init{
-        host      = os.getenv("LUA_SYSLOG_HOST") or "127.0.0.1",
+        host      = os.getenv("LUA_SYSLOG_HOST") or "10.0.0.1",
         port      = tonumber(os.getenv("LUA_SYSLOG_PORT")) or 5144,
         sock_type = os.getenv("LUA_SYSLOG_TYPE") or "udp",
         -- flush after each log, >1会发生日志丢失
-        flush_limit= ngx.var.lua_syslog_limit or 1, 
+        flush_limit= 1,
         --drop_limit= 5678
     }
     if not ok then
