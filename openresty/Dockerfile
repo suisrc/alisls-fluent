@@ -1,12 +1,14 @@
 # https://hub.docker.com/r/openresty/openresty/tags
-# FROM openresty/openresty:1.21.4.1-2-alpine-amd64
-FROM openresty/openresty:1.21.4.1-3-buster-fat-amd64
+# FROM openresty/openresty:1.21.4.1-alpine-amd64
+#FROM openresty/openresty:1.21.4.1-buster-fat-amd64
+FROM openresty/openresty:1.21.4.1-3-bullseye-fat-amd64
 
 LABEL maintainer="suisrc@outlook.com"
 
-# RUN apk update && apk add --no-cache inotify-tools envsubst &&\
+# gettext <- envsubst
+# RUN apk update && apk add --no-cache inotify-tools gettext &&\
 #     rm -rf /tmp/* /var/tmp/*
-RUN apt update && apt install -y --no-install-recommends inotify-tools envsubst &&\
+RUN apt update && apt install -y --no-install-recommends inotify-tools gettext-base &&\
     apt autoremove -y && rm -rf /var/lib/apt/lists/*
 
 # 看门狗模式环境变量
