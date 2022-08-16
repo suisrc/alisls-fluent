@@ -123,9 +123,9 @@ curl http://end-iam-cas-svc.dev-fmes.svc.cluster.local/authx?access_token=kst..a
 https://sso.dev1.sims-cn.com/api/iam/v1/authx
 curl http://127.0.0.1:82/https-443.sso.dev1.sims-cn.com/api/iam/v1/authx
 
-curl http://https-443.sso.dev1.sims-cn.com.logs-spy:88/api/iam/v1/authx
+curl http://https-443.sso.dev1.sims-cn.com.logs-spy:82/api/iam/v1/authx
 curl http://127.0.0.1:82/https-443.sso.dev1.sims-cn.com/api/iam/v1/authx
-curl http://http.end-iam-kin-svc.dev-fmes.svc.logs-spy:88/api/iam/v1/authx
+curl http://http.end-iam-kin-svc.dev-fmes.svc.logs-spy:82/api/iam/v1/authx
 curl http://127.0.0.1:82/internal.end-iam-kin-svc.dev-fmes.svc/api/iam/v1/authx
 
 
