@@ -5,7 +5,7 @@ local cjson = require "cjson"
 local logger = require "resty.logger.socket"
 if not logger.initted() then
     local ok, err = logger.init{
-        host      = os.getenv("LUA_SYSLOG_HOST") or "10.0.0.1",
+        host      = os.getenv("LUA_SYSLOG_HOST") or "127.0.0.1",
         port      = tonumber(os.getenv("LUA_SYSLOG_PORT")) or 5144,
         sock_type = os.getenv("LUA_SYSLOG_TYPE") or "udp",
         -- flush after each log, >1会发生日志丢失
@@ -29,6 +29,7 @@ msg.flowId = ngx.var.arg_flow or ""
 -- 请求鉴权匹配的策略，记录请求通过接口的策略
 msg.matchPolicys = ngx.var.http_x_request_sky_policys or ngx.ctx.sub_headers and ngx.ctx.sub_headers["X-Request-Sky-Policys"] or ""
 -- 请求描述
+msg.scheme = ngx.var.scheme or ""
 msg.host = ngx.var.proxy_host or ngx.var.host or ""
 msg.path = ngx.var.proxy_uri or ngx.var.request_uri or ""
 msg.method = ngx.var.request_method or ""
@@ -109,7 +110,7 @@ if msg.status >= "400" then
     msg.result2 = "错误"
 elseif msg.status >= "300" then
     msg.result2 = "重定向"
-elseif msg.respBody ~= nil and msg.respBody ~= "" then
+elseif msg.respBody ~= nil and msg.respBody ~= "" and string.sub(msg.respBody, 1, 1) ~= "#" then
     -- 解析 json
     local resj = cjson.decode(msg.respBody)
     -- 返回值可能存在不规范情况，即不是json类型

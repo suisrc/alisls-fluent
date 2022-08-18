@@ -132,4 +132,3 @@ curl http://127.0.0.1:82/internal.end-iam-kin-svc.dev-fmes.svc/api/iam/v1/authx
 kratos sidecar => kscar, 边车 
 kratos agent => kagt 代理
 kratos watchdog => kwdog 看门狗
-

@@ -12,13 +12,18 @@ RUN apt update && apt install -y --no-install-recommends inotify-tools gettext-b
     apt autoremove -y && rm -rf /var/lib/apt/lists/*
 
 # 看门狗模式环境变量
+# 单实例服务进程，无需太多线程 2x4096即可
+# 可以适当缩小，用户保护业务应用的并发清空
 ENV LUA_SYSLOG_HOST=\
     LUA_SYSLOG_PORT=\
+    LOG_AUTHZ_HANDLER=/etc/nginx/az/log_by_sock_usr.lua \
+    LOG_PROXY_HANDLER=/etc/nginx/az/log_by_sock_def.lua \
     NGX_SVC_ADDR=127.0.0.1 \
     NGX_RESOLVRE=10.96.0.10 \
-    NGX_AUTHX_PORT=81 \
-    NGX_AUTHZ_PORT=82 \
-    NGX_PROXY_PORT=83 \
+    NGX_AUTHX_PORT=12001 \
+    NGX_AUTHZ_PORT=12006 \
+    NGX_PROXYP_PORT=12011 \
+    NGX_PROXYH_PORT=12012 \
     NGX_KIN_HTTP=http \
     NGX_CAS_HOST=end-iam-cas-svc \
     NGX_KIN_HOST=end-iam-kin-svc \

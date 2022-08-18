@@ -1,0 +1,72 @@
+-- 动态构建虚假证书
+
+-- local ssl = require "ngx.ssl"
+-- local lrucache = require "resty.lrucache"
+-- 
+-- -- 绑定缓存文件
+-- local cache = lrucache.new(128)
+-- if not cache then
+--     ngx.log(ngx.ERR, "failed to create the cache")
+--     return ngx.exit(ngx.ERROR)
+-- end
+-- 
+-- -- get_pem_cert_data 获取证书数据
+-- local function create_pem_cert_pkey_data()
+--     
+--     -- 获取证书内容，比如 io.open("my.crt"):read("*a")
+--     local cert_data, pkey_data, err = get_pem_cert_data()
+--     if not cert_data then
+--         ngx.log(ngx.ERR, "failed to get pem cert: ", err)
+--         return
+--     end
+-- 
+--     -- 解析出 cert 类型的证书值，你可以用 lua-resty-lrucache 缓存解析结果
+--     local cert, err = ssl.parse_pem_cert(cert_data)
+--     if not cert then
+--         ngx.log(ngx.ERR, "failed to parse pem cert: ", err)
+--         return
+--     end
+--     -- 解析出 pkey 类型的私钥值，你可以用 lua-resty-lrucache 缓存解析结果
+--     local pkey, err = ssl.parse_pem_priv_key(pkey_data)
+--     if not pkey then
+--         ngx.log(ngx.ERR, "failed to parse pem private key: ", err)
+--         return
+--     end
+-- end
+-- 
+-- local name, err = ssl.server_name() or ngx.var.host
+-- if not name then
+--     ngx.log(ngx.ERR, "failed to found SNI name: ", err)
+--     ngx.exit(ngx.ERROR)
+-- end
+-- -- 清除之前设置的证书和私钥
+-- local ok, err = ssl.clear_certs()
+-- if not ok then
+--     ngx.log(ngx.ERR, "failed to clear existing (fallback) certificates")
+--     return ngx.exit(ngx.ERROR)
+-- end
+-- 
+-- -- 使用缓存绑定证书
+-- local data = cache:get(name)
+-- if not data then
+--     data = create_pem_cert_pkey_data()
+-- end
+-- if not data then
+--     ngx.exit(ngx.ERROR) -- 返回错误码
+-- end
+-- 
+-- -- 设置证书值
+-- local ok, err = ssl.set_cert(data.cert)
+-- if not ok then
+--     ngx.log(ngx.ERR, "failed to set cert: ", err)
+--     return
+-- end
+-- -- 设置私钥值
+-- local ok, err = ssl.set_priv_key(data.pkey)
+-- if not ok then
+--     ngx.log(ngx.ERR, "failed to set private key: ", err)
+--     return
+-- end
+-- 
+-- -- 缓存证书和私钥
+-- cache:set(name, data)

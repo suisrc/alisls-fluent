@@ -23,21 +23,31 @@ if ngx.ctx.resp_buffered == nil then
     -- ngx.log(ngx.ERR, "content_type: ", rtype)
     if rtype and string.sub(rtype, 1, #ajson) ~= ajson then
         ngx.ctx.resp_buffered_ignore = true
+        ngx.ctx.resp_body = "# 响应内容不是JSON类型,忽略"
         return -- 只记录json内容
     end
 end
 local chunk, eof = ngx.arg[1], ngx.arg[2]
 -- ngx.log(ngx.ERR, "chunk: ", chunk)
+-- 缓存记录resp_body内容
 if chunk ~= nil and chunk ~= "" then
     -- 记录请求body内容
     -- 这种行为很容易导致LuaJIT发生GC，但是这确实是当前唯一解决方案
     ngx.ctx.resp_buffered = (ngx.ctx.resp_buffered or "")..chunk
 end
+-- resp_buffered超过4MB，则忽略 4 * 1024 * 1024 = 4194304 = 2 << 22
+if ngx.ctx.resp_buffered ~= nil and #ngx.ctx.resp_buffered > 4194304 then
+    ngx.ctx.resp_buffered_ignore = true
+    ngx.ctx.resp_body = "# 响应内容大于4MB,忽略"
+    return -- 内容超过4MB，忽略
+end
+
 if eof then
     -- 最后一次响应，合并所有数据
     ngx.ctx.resp_body = ngx.ctx.resp_buffered
     ngx.ctx.resp_buffered = nil
 end
+
 
 -- -- 获取当前响应数据
 -- if ngx.ctx.resp_buffered == nil then
