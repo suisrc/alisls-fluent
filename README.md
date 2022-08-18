@@ -36,6 +36,10 @@ data:
         Mode     udp
 
     [OUTPUT]
+        Name   stdout
+        Match  api.*
+
+    [OUTPUT]
         Name             alisls
         Match            *
         SLSProject       YOUR_PROJECT
@@ -94,41 +98,6 @@ yum -y install fluent-bit
 yum -y install td-agent-bit
 
 cp ./bin/fluent-bit /opt/fluent-bit/bin/
-#### openresty
-cat << EOF > /etc/yum.repos.d/openresty.repo
-[openresty]
-name=Official OpenResty Open Source Repository for CentOS
-baseurl=https://openresty.org/package/centos/7/x86_64
-skip_if_unavailable=False
-gpgcheck=1
-repo_gpgcheck=0
-gpgkey=https://openresty.org/package/pubkey.gpg
-enabled=1
-enabled_metadata=1
-EOF
-cat /etc/yum.repos.d/openresty.repo
-yum -y install openresty
-
-## /etc/hosts
-curl http://end-iam-kin-svc.dev-fmes.svc/authx
-curl http://end-iam-kin-svc.dev-fmes.svc.logs-pxy.default.svc/authx
-
-## authz测试
-curl http://127.0.0.1:81/api/kas/v1?access_token=kst..account.p7_17bf2c6d678b
-curl http://127.0.0.1:81/api/iam/v1/a/odic/authx?access_token=kst..account.p7_17bf2c6d678b\
-curl http://end-iam-cas-svc.dev-fmes.svc.cluster.local/authx?access_token=kst..account.p7_17bf2c6d678b
 
 
-## proxy测试
-https://sso.dev1.sims-cn.com/api/iam/v1/authx
-curl http://127.0.0.1:82/https-443.sso.dev1.sims-cn.com/api/iam/v1/authx
 
-curl http://https-443.sso.dev1.sims-cn.com.logs-spy:82/api/iam/v1/authx
-curl http://127.0.0.1:82/https-443.sso.dev1.sims-cn.com/api/iam/v1/authx
-curl http://http.end-iam-kin-svc.dev-fmes.svc.logs-spy:82/api/iam/v1/authx
-curl http://127.0.0.1:82/internal.end-iam-kin-svc.dev-fmes.svc/api/iam/v1/authx
-
-
-kratos sidecar => kscar, 边车 
-kratos agent => kagt 代理
-kratos watchdog => kwdog 看门狗
