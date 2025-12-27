@@ -1,5 +1,5 @@
 
-FROM golang:1.25-alpine as builder
+FROM golang:trixie-slim as builder
 
 COPY go.mod /build/
 COPY go.sum /build/
