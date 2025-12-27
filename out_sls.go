@@ -12,8 +12,6 @@ import (
 	"github.com/gogo/protobuf/proto"
 )
 
-var project *sls.LogProject
-var logStore *sls.LogStore
 var hostname, _ = os.Hostname()
 
 //export FLBPluginRegister
@@ -25,31 +23,38 @@ func FLBPluginRegister(ctx unsafe.Pointer) int {
 //export FLBPluginInit
 func FLBPluginInit(plugin unsafe.Pointer) int {
 
-	project = &sls.LogProject{
+	project := &sls.LogProject{
 		Name:            output.FLBPluginConfigKey(plugin, "SLSProject"),
 		Endpoint:        output.FLBPluginConfigKey(plugin, "SLSEndPoint"),
 		AccessKeyID:     output.FLBPluginConfigKey(plugin, "AccessKeyID"),
 		AccessKeySecret: output.FLBPluginConfigKey(plugin, "AccessKeySecret"),
 	}
 
-	SLSLogStore := output.FLBPluginConfigKey(plugin, "SLSLogStore")
+	storeKey := output.FLBPluginConfigKey(plugin, "SLSLogStore")
+	//matchKey := output.FLBPluginConfigKey(plugin, "Match")
+	store, err := project.GetLogStore(storeKey)
 
-	var err error
-	if logStore, err = project.GetLogStore(SLSLogStore); err != nil {
-		fmt.Printf("[error] GetLogStore [%s] failed: %v", SLSLogStore, err)
+	if err != nil {
+		fmt.Printf("[error] GetLogStore [%s] failed: %v", storeKey, err)
 		return output.FLB_ERROR
 	}
 
+	output.FLBPluginSetContext(plugin, store)
 	return output.FLB_OK
 }
 
 //export FLBPluginFlushCtx
 func FLBPluginFlushCtx(ctx, data unsafe.Pointer, length C.int, tag *C.char) int {
 	// Gets called with a batch of records to be written to an instance.
-
-	if logStore == nil {
-		fmt.Printf("[error] logStore is nil")
+	var store *sls.LogStore
+	if store0 := output.FLBPluginGetContext(ctx); store0 == nil {
+		fmt.Printf("[error] alisls store is nil")
 		return output.FLB_ERROR
+	} else if store1, ok := store0.(*sls.LogStore); !ok {
+		fmt.Printf("[error] alisls store is err")
+		return output.FLB_ERROR
+	} else {
+		store = store1
 	}
 
 	logs := []*sls.Log{}
@@ -60,15 +65,15 @@ func FLBPluginFlushCtx(ctx, data unsafe.Pointer, length C.int, tag *C.char) int 
 			break
 		}
 
-		var logTime time.Time
+		var current time.Time
 		switch t := ts.(type) {
 		case output.FLBTime:
-			logTime = ts.(output.FLBTime).Time
+			current = ts.(output.FLBTime).Time
 		case uint64:
-			logTime = time.Unix(int64(t), 0)
+			current = time.Unix(int64(t), 0)
 		default:
 			fmt.Println("[warn] unknown timestamp format.")
-			logTime = time.Now()
+			current = time.Now()
 		}
 
 		idx := 0
@@ -93,7 +98,7 @@ func FLBPluginFlushCtx(ctx, data unsafe.Pointer, length C.int, tag *C.char) int 
 		}
 
 		l := &sls.Log{
-			Time:     proto.Uint32(uint32(logTime.Unix())),
+			Time:     proto.Uint32(uint32(current.Unix())),
 			Contents: contents,
 		}
 		logs = append(logs, l)
@@ -110,9 +115,8 @@ func FLBPluginFlushCtx(ctx, data unsafe.Pointer, length C.int, tag *C.char) int 
 	}
 
 	// todo body 5M limit
-	err := logStore.PutLogs(group)
-	if err != nil {
-		fmt.Printf("[error] logsotre [%s] putlogs [%d] fail, err: %s\n", logStore.Name, len(logs), err)
+	if err := store.PutLogs(group); err != nil {
+		fmt.Printf("[error] logsotre [%s] putlogs [%d] fail, err: %s\n", store.Name, len(logs), err)
 		return output.FLB_ERROR
 	}
 
